@@ -1,24 +1,34 @@
+package com.example;
+
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.mapreduce.Mapper;
 
 import java.io.IOException;
 import java.util.StringTokenizer;
 
-public class DocumentSimilarityMapper extends Mapper<Object, Text, Text, Text> {
-    public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
-        String line = value.toString();
-        String[] parts = line.split("\t", 2);
-        if (parts.length < 2) return;
+public class DocumentSimilarityMapper extends Mapper<LongWritable, Text, Text, Text> {
+    
+    private Text word = new Text();
+    private Text docId = new Text();
 
-        String docId = parts[0];  // Document ID
-        String content = parts[1];
+    @Override
+    protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
+        // Input format: "doc1.txt hadoop is a distributed system"
+        String line = value.toString().trim();
+        String[] parts = line.split("\\s+", 2);
 
-        StringTokenizer tokenizer = new StringTokenizer(content);
+        if (parts.length < 2) return; // Ignore invalid lines
+
+        String documentName = parts[0]; // Extract document ID (e.g., doc1.txt)
+        String documentContent = parts[1]; // Extract document words
+
+        docId.set(documentName);
+        StringTokenizer tokenizer = new StringTokenizer(documentContent);
+
         while (tokenizer.hasMoreTokens()) {
-            String word = tokenizer.nextToken().replaceAll("[^a-zA-Z]", "").toLowerCase();
-            if (!word.isEmpty()) {
-                context.write(new Text(word), new Text(docId));
-            }
+            word.set(tokenizer.nextToken());
+            context.write(word, docId); // Emit (word, documentID)
         }
     }
 }
