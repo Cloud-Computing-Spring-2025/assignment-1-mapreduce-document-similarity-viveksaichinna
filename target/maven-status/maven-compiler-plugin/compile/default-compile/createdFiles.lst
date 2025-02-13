@@ -1,0 +1,3 @@
+DocumentSimilarityMapper.class
+DocumentSimilarityDriver.class
+DocumentSimilarityReducer.class
