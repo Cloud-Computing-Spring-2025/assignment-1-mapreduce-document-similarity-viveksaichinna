@@ -23,12 +23,11 @@ public class DocumentSimilarityMapper extends Mapper<LongWritable, Text, Text, T
         String documentName = parts[0]; // Extract document ID (e.g., doc1.txt)
         String documentContent = parts[1]; // Extract document words
 
-        docId.set(documentName);
         StringTokenizer tokenizer = new StringTokenizer(documentContent);
-
         while (tokenizer.hasMoreTokens()) {
             word.set(tokenizer.nextToken());
-            context.write(word, docId); // Emit (word, documentID)
+            docId.set(documentName);
+            context.write(docId, word);  // Emit (docID, word)
         }
     }
 }
